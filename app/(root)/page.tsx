@@ -1,14 +1,19 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { Modal } from "@/components/ui/modal";
 import React from "react";
 
-const Home = () => {
+const SetupPage = () => {
   return (
     <div className="p-4">
-      <Button size="default" variant="destructive">
-        Click Me
-      </Button>
+      <Modal
+        title="Test"
+        description="Test Description"
+        isOpen
+        onClose={() => {}}
+      ></Modal>
     </div>
   );
 };
 
-export default Home;
+export default SetupPage;
