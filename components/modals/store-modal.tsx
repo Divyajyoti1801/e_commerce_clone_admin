@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { useStoreModal } from "@/hooks/use-store-modal";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,15 +18,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
 import { Button } from "../ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
+
 const formSchema = z.object({
   name: z.string().min(1),
 });
@@ -37,7 +38,7 @@ export const StoreModal = () => {
     try {
       setLoading(true);
       const response = await axios.post("/api/stores", values);
-      toast.success("Store Created Successfully");
+      window.location.assign(`/${response.data.id}`);
     } catch (error) {
       toast.error("Something Went Wrong!");
     } finally {
@@ -49,8 +50,8 @@ export const StoreModal = () => {
     <Modal
       title="Create Store"
       description="Add a new store to manage products and categories"
-      isOpen={true}
-      onClose={() => {}}
+      isOpen={storeModal.isOpen}
+      onClose={storeModal.onClose}
     >
       <div className="space-y-4 py-2 pb-4">
         <Form {...form}>
