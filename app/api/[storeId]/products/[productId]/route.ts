@@ -15,6 +15,12 @@ export async function GET(
       where: {
         id: params.productId,
       },
+      include: {
+        images: true,
+        category: true,
+        color: true,
+        size: true,
+      },
     });
     return NextResponse.json(product);
   } catch (error) {
@@ -25,26 +31,47 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { storeId: string; billboardId: string } }
+  { params }: { params: { storeId: string; productId: string } }
 ) {
   try {
     const { userId } = auth();
     const body = await req.json();
-    const { label, imageUrl } = body;
+    const {
+      name,
+      images,
+      categoryId,
+      colorId,
+      sizeId,
+      price,
+      isFeatured,
+      isArchived,
+    } = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 403 });
     }
-
-    if (!label) {
+    if (!name) {
       return new NextResponse("Label is required", { status: 400 });
     }
-    if (!imageUrl) {
+    if (!price) {
+      return new NextResponse("Price is required", { status: 400 });
+    }
+    if (!categoryId) {
+      return new NextResponse("Category Id is required", { status: 400 });
+    }
+    if (!colorId) {
+      return new NextResponse("Color Id is required", { status: 400 });
+    }
+    if (!sizeId) {
+      return new NextResponse("Size Id is required", { status: 400 });
+    }
+
+    if (!images || !images.length) {
       return new NextResponse("imageUrl is required", { status: 400 });
     }
 
-    if (!params.billboardId) {
-      return new NextResponse("Billboard Id is required", { status: 400 });
+    if (!params.productId) {
+      return new NextResponse("Product Id is required", { status: 400 });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
@@ -58,34 +85,55 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    const billboard = await prismadb.billboard.updateMany({
+    await prismadb.product.update({
       where: {
-        id: params.billboardId,
+        id: params.productId,
       },
       data: {
-        label,
-        imageUrl,
+        name,
+        price,
+        colorId,
+        categoryId,
+        sizeId,
+        images: {
+          deleteMany: {},
+        },
+        isFeatured,
+        isArchived,
       },
     });
 
-    return NextResponse.json(billboard);
+    const product = await prismadb.product.update({
+      where: {
+        id: params.productId,
+      },
+      data: {
+        images: {
+          createMany: {
+            data: [...images.map((image: { url: string }) => image)],
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(product);
   } catch (error) {
-    console.log("[BILLBOARD_PATCH]", error);
+    console.log("[PRODUCT_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { storeId: string; billboardId: string } }
+  { params }: { params: { storeId: string; productId: string } }
 ) {
   try {
     const { userId } = auth();
     if (!userId) {
       return new NextResponse("Unauthenticated ", { status: 403 });
     }
-    if (!params.billboardId) {
-      return new NextResponse("Billboard Id is required", { status: 400 });
+    if (!params.productId) {
+      return new NextResponse("Product Id is required", { status: 400 });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
@@ -99,14 +147,14 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    const billboard = await prismadb.billboard.deleteMany({
+    const product = await prismadb.product.deleteMany({
       where: {
-        id: params.billboardId,
+        id: params.productId,
       },
     });
-    return NextResponse.json(billboard);
+    return NextResponse.json(product);
   } catch (error) {
-    console.log("[BILLBOARD_DELETE]", error);
+    console.log("[PRODUCT_DELETE]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
