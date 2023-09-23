@@ -4,7 +4,7 @@ import { ProductForm } from "./components/product-form";
 const ProductPage = async ({
   params,
 }: {
-  params: { storeId: string; productId: string };
+  params: { productId: string; storeId: string };
 }) => {
   const product = await prismadb.product.findUnique({
     where: {
