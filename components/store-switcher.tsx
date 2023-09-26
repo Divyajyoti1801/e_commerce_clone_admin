@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/popover";
 import { useStoreModal } from "@/hooks/use-store-modal";
 import { cn } from "@/lib/utils";
-import { Store } from "@prisma/client";
 import {
   Check,
   ChevronsUpDown,
@@ -31,7 +30,7 @@ type PopoverTriggerProps = React.ComponentPropsWithoutRef<
 >;
 
 interface StoreSwitcherProps extends PopoverTriggerProps {
-  items: Store[];
+  items: Record<string, any>[];
 }
 
 export default function StoreSwitcher({
@@ -80,7 +79,10 @@ export default function StoreSwitcher({
             <CommandEmpty>No store found.</CommandEmpty>
             <CommandGroup heading="Stores">
               {formattedItems.map((store) => (
-                <CommandItem key={store.value}>
+                <CommandItem
+                  key={store.value}
+                  onSelect={() => onStoreSelect(store)}
+                >
                   <StoreIcon className="mr-2 h-4 w-4" /> {store.label}
                   <Check
                     className={cn(
